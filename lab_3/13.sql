@@ -1,5 +1,5 @@
 -- Write a function that takes as parameter a product id and a integer q; 
--- as output it should return TRUE iff the product has a UNITSINSTOCK 
+-- as output it should print TRUE iff the product has a UNITSINSTOCK 
 -- value strictly greater than q, FALSE otherwise.
 
 SET SERVEROUTPUT ON;
