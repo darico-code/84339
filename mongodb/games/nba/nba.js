@@ -48,7 +48,7 @@ differenza è di un unico punto e in cui ha vinto la squadra di casa (la
 squadra che ha vinto è il team1)
 */
 
-
+/*
 console.log(db.games.aggregate([
     {
       $project: {
@@ -77,3 +77,29 @@ console.log(db.games.aggregate([
     }
   ])
 )
+*/
+
+/* 28. Raggruppare per nome_squadra e calcolare la media punti fatta
+e subita (solo nelle partite vinte (team0)) */
+
+/*
+db.games.aggregate([{$project: {'nome_squadra': {$getField:{field:'name', input:{$arrayElemAt: ["$teams", 0]}}}, 'score1': {$getField: {field: 'score', input: {$arrayElemAt: ["$teams", 0]}}}, 'score2': {$getField: {field:'score', input:{$arrayElemAt: ["$teams", 1]}}} }},
+{$group: {'_id': '$nome_squadra', 'avg_point_made': {"$avg": "$score1"}, 'avg_point_taken': {"$avg": "$score2"}}}])
+*/
+
+/*
+29. Contare il numero di partite giocate per ogni mese, anno
+(ordinando il risultato su anno, mese)
+*/
+console.log(db.games.aggregate
+(
+  [
+    {
+      $group:
+      {
+        '_id': {'anno': {$year: '$date'}, 'mese': {$month: '$date'}},
+        'numPartite': {$sum: 1}
+      }
+    }
+  ]
+))
