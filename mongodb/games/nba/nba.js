@@ -91,6 +91,8 @@ db.games.aggregate([{$project: {'nome_squadra': {$getField:{field:'name', input:
 29. Contare il numero di partite giocate per ogni mese, anno
 (ordinando il risultato su anno, mese)
 */
+
+/*
 console.log(db.games.aggregate
 (
   [
@@ -102,4 +104,93 @@ console.log(db.games.aggregate
       }
     }
   ]
+))*/
+
+/*
+30. Eseguire l’unwind dell’array teams e raggruppare per team per
+ottenere il totale di: partite giocate, vinte, perse, punti segnati
+*/
+
+/*
+console.log(db.games.aggregate(
+  [
+    {
+      $unwind: 
+      {path: "$teams"}
+    },
+    {
+      $group: 
+      { '_id': "$teams.name",
+        'played_matches': {"$sum": 1},
+        'pts_total': {"$sum": "$teams.score"},
+        'matches_won': {"$sum": "$teams.won"},
+      }
+    }, {
+      $addFields : {
+        'matches_lost': {$subtract : ['$played_matches', '$matches_won']}
+      }
+    }
+
+  ]
+));
+*/
+
+/*
+31. Eseguire l’unwind dell’array box e dell’array players, raggruppare
+per player per ottenere il totale di punti segnati; ordinare il risultato
+per visualizzare per primi i migliori giocatori del’NBA
+*/
+
+/*
+console.log(db.games.aggregate(
+  [
+    { $unwind: 
+      { path: '$box' } 
+    }, 
+    { $unwind:
+      {path: '$box.players'}
+    },
+    {
+      $group: 
+      {
+        '_id': '$box.players.player',
+        'total_points': {"$sum": '$box.players.pts'}
+      }
+    },
+    {
+      $sort: {'total_points': -1}
+    }
+  ]
+))*/
+
+// Usare anche la collezione nba2016_players
+
+/*
+32. Unire la collection games con la collection nba2016_players ed
+escludere i giocatori per cui non sono state trovati riferimenti (N.B.:
+se non ci sono riferimenti, il nuovo campo sarà un array vuoto)
+
+
+
+console.log(db.games.aggregate(
+  [
+    {$lookup:{from: "nba2016players", localField : "box.players.player", foreignField: "name", as: "nba2016dati"}},
+    {$match :{$expr:{$gt: [{$size: "$nba2016dati"}, 0]}}}
+  ]
 ))
+*/
+
+/*
+33. Estendere la query precedente per visualizzare il nome del
+giocatore, il totale di punti fatti ed il valore suo contratto (contract.amount)
+*/
+/*
+console.log(db.games.aggregate(
+  [
+    {$lookup:{from: "nba2016players", localField : "box.players.player", foreignField: "name", as: "nba2016dati"}},
+    {$match :{$expr:{$gt: [{$size: "$nba2016dati"}, 0]}}},
+    {$project: {"name": "$nba2016dati.name", "points_made": {$getField: {field: 'pts', input: {$arrayElemAt: [{$arrayElemAt: ["$nba2016dati.stats", 0]}, 0]}}},
+               "contract_values": "$nba2016dati.contract.amount"}}
+  ]
+))
+*/
